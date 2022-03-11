@@ -36,10 +36,17 @@ resource "libvirt_network" "network" {
   }
 }
 
+resource "libvirt_cloudinit_disk" "initdisk" {
+  name      = "init"
+  pool      = libvirt_pool.storage.name
+  user_data = templatefile("${path.module}/config/cloud_init.cfg", { ssh_key = var.ssh_key })
+}
+
 resource "libvirt_domain" "instance" {
   name      = "instance"
   vcpu      = 1
   memory    = "1024"
+  cloudinit = libvirt_cloudinit_disk.initdisk.id
 
   console {
     type        = "pty"

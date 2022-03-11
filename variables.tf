@@ -13,3 +13,8 @@ variable "domain" {
   type        = string
   description = "The domain used by the DNS server on the instance network"
 }
+
+variable "ssh_key" {
+  type        = string
+  description = "The key used for accessing instances using SSH"
+}
