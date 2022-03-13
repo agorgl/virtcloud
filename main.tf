@@ -9,6 +9,10 @@ terraform {
 
 provider "libvirt" {}
 
+locals {
+  subnet = "10.3.0.0/24"
+}
+
 resource "libvirt_pool" "storage" {
   name = "storage"
   type = "dir"
@@ -30,9 +34,15 @@ resource "libvirt_volume" "disk" {
 resource "libvirt_network" "network" {
   name      = "network"
   domain    = var.domain
-  addresses = ["10.3.0.0/24"]
+  addresses = [local.subnet]
   dns {
     enabled = true
+  }
+  dnsmasq_options {
+    options  {
+      option_name = "listen-address"
+      option_value = cidrhost(local.subnet, 1)
+    }
   }
 }
 
