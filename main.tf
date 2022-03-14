@@ -11,6 +11,8 @@ provider "libvirt" {}
 
 locals {
   subnet = "10.3.0.0/24"
+  lb_net = cidrsubnet(local.subnet, 4, 12)
+  ingress_ip = cidrhost(local.lb_net, 0)
 }
 
 resource "libvirt_pool" "storage" {
@@ -52,7 +54,7 @@ resource "libvirt_cloudinit_disk" "initdisk" {
   pool      = libvirt_pool.storage.name
   user_data = templatefile("${path.module}/config/cloud_init.cfg", {
                 ssh_key = var.ssh_key,
-                lb_net = cidrsubnet(local.subnet, 4, 12)
+                lb_net = local.lb_net
               })
 }
 
