@@ -29,6 +29,7 @@ resource "libvirt_volume" "disk" {
   name           = "disk"
   pool           = libvirt_pool.storage.name
   base_volume_id = libvirt_volume.image.id
+  size           = 1024 * 1024 * 1024 * 8
 }
 
 resource "libvirt_network" "network" {
