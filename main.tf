@@ -40,6 +40,10 @@ resource "libvirt_network" "network" {
   addresses = [local.subnet]
   dns {
     enabled = true
+    hosts  {
+      hostname = var.domain
+      ip = local.ingress_ip
+    }
   }
   dnsmasq_options {
     options  {
