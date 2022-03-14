@@ -49,7 +49,10 @@ resource "libvirt_network" "network" {
 resource "libvirt_cloudinit_disk" "initdisk" {
   name      = "init"
   pool      = libvirt_pool.storage.name
-  user_data = templatefile("${path.module}/config/cloud_init.cfg", { ssh_key = var.ssh_key })
+  user_data = templatefile("${path.module}/config/cloud_init.cfg", {
+                ssh_key = var.ssh_key,
+                lb_net = cidrsubnet(local.subnet, 4, 12)
+              })
 }
 
 resource "libvirt_domain" "instance" {
