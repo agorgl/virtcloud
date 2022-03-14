@@ -10,9 +10,11 @@ terraform {
 provider "libvirt" {}
 
 locals {
+  user = "debian"
   subnet = "10.3.0.0/24"
   lb_net = cidrsubnet(local.subnet, 4, 12)
   ingress_ip = cidrhost(local.lb_net, 0)
+  control_plane_host = "${libvirt_domain.instance.name}.${var.domain}"
 }
 
 resource "libvirt_pool" "storage" {
@@ -57,6 +59,7 @@ resource "libvirt_cloudinit_disk" "initdisk" {
   name      = "init"
   pool      = libvirt_pool.storage.name
   user_data = templatefile("${path.module}/config/cloud_init.cfg", {
+                user = local.user,
                 ssh_key = var.ssh_key,
                 lb_net = local.lb_net
               })
@@ -88,4 +91,18 @@ resource "libvirt_domain" "instance" {
   disk {
     volume_id = libvirt_volume.disk.id
   }
+}
+
+data "external" "kubeconfig" {
+  depends_on = [
+    libvirt_domain.instance,
+  ]
+
+  program = [
+    "ssh",
+    "-o UserKnownHostsFile=/dev/null",
+    "-o StrictHostKeyChecking=no",
+    "${local.user}@${local.control_plane_host}",
+    "cloud-init status --wait >/dev/null; echo '{\"kubeconfig\":\"'$(sudo cat /etc/rancher/k3s/k3s.yaml | base64)'\"}'"
+  ]
 }
