@@ -57,6 +57,10 @@ resource "libvirt_network" "network" {
       option_name = "listen-address"
       option_value = cidrhost(local.subnet, 1)
     }
+    options  {
+      option_name = "address"
+      option_value = "/${var.domain}/${local.ingress_ip}"
+    }
   }
 }
 
