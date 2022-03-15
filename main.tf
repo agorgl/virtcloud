@@ -4,10 +4,15 @@ terraform {
       source = "dmacvicar/libvirt"
       version = "0.6.14"
     }
+    null = {
+      source = "hashicorp/null"
+      version = "3.1.0"
+    }
   }
 }
 
 provider "libvirt" {}
+provider "null" {}
 
 locals {
   user = "debian"
@@ -93,9 +98,24 @@ resource "libvirt_domain" "instance" {
   }
 }
 
+resource "null_resource" provision_wait {
+  connection {
+    type     = "ssh"
+    user     = local.user
+    host     = local.control_plane_host
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "cloud-init status --wait >/dev/null; true",
+    ]
+  }
+}
+
 data "external" "kubeconfig" {
   depends_on = [
     libvirt_domain.instance,
+    null_resource.provision_wait,
   ]
 
   program = [
@@ -103,6 +123,6 @@ data "external" "kubeconfig" {
     "-o UserKnownHostsFile=/dev/null",
     "-o StrictHostKeyChecking=no",
     "${local.user}@${local.control_plane_host}",
-    "cloud-init status --wait >/dev/null; echo '{\"kubeconfig\":\"'$(sudo cat /etc/rancher/k3s/k3s.yaml | base64)'\"}'"
+    "echo '{\"kubeconfig\":\"'$(sudo cat /etc/rancher/k3s/k3s.yaml | base64)'\"}'"
   ]
 }
