@@ -103,6 +103,10 @@ resource "libvirt_domain" "instance" {
 }
 
 resource "null_resource" provision_wait {
+  triggers = {
+    instance_ids = libvirt_domain.instance.id
+  }
+
   connection {
     type     = "ssh"
     user     = local.user
@@ -118,7 +122,6 @@ resource "null_resource" provision_wait {
 
 data "external" "kubeconfig" {
   depends_on = [
-    libvirt_domain.instance,
     null_resource.provision_wait,
   ]
 
