@@ -77,7 +77,7 @@ resource "libvirt_cloudinit_disk" "initdisk" {
 resource "libvirt_domain" "instance" {
   name      = "instance"
   vcpu      = 1
-  memory    = "1024"
+  memory    = "2048"
   cloudinit = libvirt_cloudinit_disk.initdisk.id
 
   console {
