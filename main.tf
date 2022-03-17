@@ -19,6 +19,7 @@ locals {
   subnet = "10.3.0.0/24"
   lb_net = cidrsubnet(local.subnet, 4, 12)
   ingress_ip = cidrhost(local.lb_net, 0)
+  internal_dns_ip = cidrhost(local.lb_net, 1)
   control_plane_host = "${libvirt_domain.instance.name}.${var.domain}"
 }
 
@@ -47,19 +48,15 @@ resource "libvirt_network" "network" {
   addresses = [local.subnet]
   dns {
     enabled = true
-    hosts  {
-      hostname = var.domain
-      ip = local.ingress_ip
+    forwarders {
+      domain = var.domain
+      address = local.internal_dns_ip
     }
   }
   dnsmasq_options {
     options  {
       option_name = "listen-address"
       option_value = cidrhost(local.subnet, 1)
-    }
-    options  {
-      option_name = "address"
-      option_value = "/${var.domain}/${local.ingress_ip}"
     }
   }
 }
@@ -70,7 +67,8 @@ resource "libvirt_cloudinit_disk" "initdisk" {
   user_data = templatefile("${path.module}/config/cloud_init.cfg", {
                 user = local.user,
                 ssh_key = var.ssh_key,
-                lb_net = local.lb_net
+                lb_net = local.lb_net,
+                domain = var.domain
               })
 }
 
