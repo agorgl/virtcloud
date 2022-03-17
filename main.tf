@@ -113,7 +113,8 @@ resource "null_resource" provision_wait {
 
   provisioner "remote-exec" {
     inline = [
-      "cloud-init status --wait >/dev/null; true",
+      "cloud-init status --wait >/dev/null",
+      "until [ -f /etc/rancher/k3s/k3s.yaml ]; do sleep 1; done",
     ]
   }
 }
