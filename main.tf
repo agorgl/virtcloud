@@ -18,7 +18,6 @@ locals {
   user = "debian"
   subnet = "10.3.0.0/24"
   lb_net = cidrsubnet(local.subnet, 4, 12)
-  ingress_ip = cidrhost(local.lb_net, 0)
   internal_dns_ip = cidrhost(local.lb_net, 1)
   control_plane_host = "${libvirt_domain.instance.name}.${var.domain}"
 }
