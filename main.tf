@@ -64,6 +64,7 @@ resource "libvirt_cloudinit_disk" "initdisk" {
   name      = "init"
   pool      = libvirt_pool.storage.name
   user_data = templatefile("${path.module}/config/cloud_init.cfg", {
+                hostname = "instance",
                 user = local.user,
                 ssh_key = var.ssh_key,
                 lb_net = local.lb_net,
