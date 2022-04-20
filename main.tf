@@ -8,11 +8,16 @@ terraform {
       source = "hashicorp/null"
       version = "3.1.0"
     }
+    ssh = {
+      source = "loafoe/ssh"
+      version = "1.2.0"
+    }
   }
 }
 
 provider "libvirt" {}
 provider "null" {}
+provider "ssh" {}
 
 locals {
   user = "debian"
@@ -119,16 +124,16 @@ resource "null_resource" provision_wait {
   }
 }
 
-data "external" "kubeconfig" {
+resource "ssh_resource" "kubeconfig" {
   depends_on = [
     null_resource.provision_wait,
   ]
 
-  program = [
-    "ssh",
-    "-o UserKnownHostsFile=/dev/null",
-    "-o StrictHostKeyChecking=no",
-    "${local.user}@${local.control_plane_host}",
-    "echo '{\"kubeconfig\":\"'$(sudo cat /etc/rancher/k3s/k3s.yaml | base64)'\"}'"
+  host         = local.control_plane_host
+  user         = local.user
+  agent        = true
+
+  commands = [
+    "sudo cat /etc/rancher/k3s/k3s.yaml",
   ]
 }

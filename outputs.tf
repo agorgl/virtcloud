@@ -3,6 +3,6 @@ output "instance_ip" {
 }
 
 output "kubeconfig" {
-  value       = replace(base64decode(replace(data.external.kubeconfig.result.kubeconfig, " ", "")), "127.0.0.1", "${local.control_plane_host}")
+  value       = replace(ssh_resource.kubeconfig.result, "127.0.0.1", "${local.control_plane_host}")
   sensitive   = true
 }
