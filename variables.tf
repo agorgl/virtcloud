@@ -1,20 +1,19 @@
-variable "pool_dir" {
+variable "cluster_name" {
   type        = string
-  description = "The directory that the storage pool will keep its volumes"
+  description = "The unique name that identifies the cluster"
 }
 
-variable "base_image" {
+variable "cluster_domain" {
   type        = string
-  description = "The base image used as a backing volume for all instances"
-  default     = "https://cloud.debian.org/images/cloud/bullseye/latest/debian-11-genericcloud-amd64.qcow2"
+  description = "The domain used by the cluster DNS server on the instance network"
 }
 
-variable "domain" {
+variable "cluster_ssh_key" {
   type        = string
-  description = "The domain used by the DNS server on the instance network"
+  description = "The key used for accessing cluster instances using SSH"
 }
 
-variable "ssh_key" {
+variable "cluster_pool_dir" {
   type        = string
-  description = "The key used for accessing instances using SSH"
+  description = "The directory that the cluster storage pool will keep its volumes"
 }
