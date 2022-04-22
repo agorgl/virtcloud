@@ -19,30 +19,30 @@ locals {
   user = "debian"
   lb_net = cidrsubnet(var.subnet, 4, 12)
   internal_dns_ip = cidrhost(local.lb_net, 1)
-  control_plane_host = "${libvirt_domain.instance.name}.${var.domain}"
+  control_plane_host = "${libvirt_domain.instance.network_interface[0].hostname}.${var.domain}"
 }
 
 resource "libvirt_pool" "storage" {
-  name = "storage"
+  name = "${var.name}-storage"
   type = "dir"
   path = var.pool_dir
 }
 
 resource "libvirt_volume" "image" {
-  name   = "image"
+  name   = "${var.name}-image"
   pool   = libvirt_pool.storage.name
   source = var.base_image
 }
 
 resource "libvirt_volume" "disk" {
-  name           = "disk"
+  name           = "${var.name}-disk"
   pool           = libvirt_pool.storage.name
   base_volume_id = libvirt_volume.image.id
   size           = 1024 * 1024 * 1024 * 8
 }
 
 resource "libvirt_network" "network" {
-  name      = "network"
+  name      = "${var.name}-network"
   domain    = var.domain
   addresses = [var.subnet]
   dns {
@@ -61,7 +61,7 @@ resource "libvirt_network" "network" {
 }
 
 resource "libvirt_cloudinit_disk" "initdisk" {
-  name      = "init"
+  name      = "${var.name}-init"
   pool      = libvirt_pool.storage.name
   user_data = templatefile("${path.module}/config/cloud_init.cfg", {
                 hostname = "instance",
@@ -73,7 +73,7 @@ resource "libvirt_cloudinit_disk" "initdisk" {
 }
 
 resource "libvirt_domain" "instance" {
-  name      = "instance"
+  name      = "${var.name}-instance"
   vcpu      = 1
   memory    = "2048"
   cloudinit = libvirt_cloudinit_disk.initdisk.id
@@ -92,6 +92,7 @@ resource "libvirt_domain" "instance" {
 
   network_interface {
     network_id     = libvirt_network.network.id
+    hostname       = "instance"
     wait_for_lease = true
   }
 
