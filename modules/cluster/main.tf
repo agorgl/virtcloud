@@ -17,8 +17,7 @@ terraform {
 
 locals {
   user = "debian"
-  subnet = "10.3.0.0/24"
-  lb_net = cidrsubnet(local.subnet, 4, 12)
+  lb_net = cidrsubnet(var.subnet, 4, 12)
   internal_dns_ip = cidrhost(local.lb_net, 1)
   control_plane_host = "${libvirt_domain.instance.name}.${var.domain}"
 }
@@ -45,7 +44,7 @@ resource "libvirt_volume" "disk" {
 resource "libvirt_network" "network" {
   name      = "network"
   domain    = var.domain
-  addresses = [local.subnet]
+  addresses = [var.subnet]
   dns {
     enabled = true
     forwarders {
@@ -56,7 +55,7 @@ resource "libvirt_network" "network" {
   dnsmasq_options {
     options  {
       option_name = "listen-address"
-      option_value = cidrhost(local.subnet, 1)
+      option_value = cidrhost(var.subnet, 1)
     }
   }
 }

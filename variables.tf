@@ -8,6 +8,11 @@ variable "cluster_domain" {
   description = "The domain used by the cluster DNS server on the instance network"
 }
 
+variable "cluster_subnet" {
+  type        = string
+  description = "The subnet associated with the cluster instance network"
+}
+
 variable "cluster_ssh_key" {
   type        = string
   description = "The key used for accessing cluster instances using SSH"

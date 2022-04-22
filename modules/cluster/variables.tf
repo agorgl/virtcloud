@@ -8,6 +8,11 @@ variable "domain" {
   description = "The domain used by the DNS server on the instance network"
 }
 
+variable "subnet" {
+  type        = string
+  description = "The subnet associated with the instance network"
+}
+
 variable "ssh_key" {
   type        = string
   description = "The key used for accessing instances using SSH"
